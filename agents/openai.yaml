@@ -1,0 +1,7 @@
+interface:
+  display_name: "ChatPaper Library"
+  short_description: "批量精读论文、生成思维导图并维护可搜索的 HTML 论文库"
+  brand_color: "#ED7E7D"
+  default_prompt: "Use $chatpaper-library to analyze these paper PDFs and update my local reading library."
+policy:
+  allow_implicit_invocation: true
