@@ -25,6 +25,13 @@ Give one compact synthesis. For a review or systems paper, show the central tech
 
 Define the concepts needed to read the paper. Use a comparison table when several concepts are easy to confuse. Preserve equations only when they materially clarify the method and identify their source section or page.
 
+> **公式排版规范（Mathematical Equation Formatting）**：
+> - 针对数学公式与变量，支持标准 LaTeX 语法与 KaTeX 渲染：
+>   - **行内公式**：使用单个美元符号包裹，例如 `$E = mc^2$` 或 `$\\mathcal{L}_{total} = \\mathcal{L}_{data} + \\lambda \\mathcal{L}_{phy}$`；
+>   - **独立显示公式**：使用单独成行的 `$$` 包裹块；
+>   - **简短变量/参数/代码片段**：可使用反引号包裹（如 `` `^f_nadir \\geqslant ^f_min` ``）；
+>   - 避免在公式外部遗留未格式化的 LaTeX 命令（如单独出现的 `\\frac`、`\\lambda` 等）。
+
 ## 4. 论文梳理的方法体系
 
 Break the paper into numbered method subsections. For each approach, explain its basic idea, strengths, limitations, assumptions, and role in the larger workflow. Use four-column comparison tables where appropriate.
