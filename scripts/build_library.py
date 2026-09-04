@@ -11,17 +11,34 @@ from pathlib import Path
 
 
 def inline(text: str) -> str:
-    value = html.escape(text.strip())
+    raw = text.strip()
     code: list[str] = []
     def keep_code(match: re.Match[str]) -> str:
-        code.append(f"<code>{match.group(1)}</code>")
+        code.append(f"<code>{html.escape(match.group(1))}</code>")
         return f"@@CODE{len(code)-1}@@"
-    value = re.sub(r"`([^`]+)`", keep_code, value)
+    raw = re.sub(r"`([^`]+)`", keep_code, raw)
+
+    math_spans: list[str] = []
+    def keep_display_math(match: re.Match[str]) -> str:
+        math_spans.append(f'<span class="math-display">{html.escape(match.group(0))}</span>')
+        return f"@@MATH{len(math_spans)-1}@@"
+    def keep_inline_math(match: re.Match[str]) -> str:
+        math_spans.append(f'<span class="math-inline">{html.escape(match.group(0))}</span>')
+        return f"@@MATH{len(math_spans)-1}@@"
+
+    raw = re.sub(r"\$\$(.+?)\$\$", keep_display_math, raw)
+    raw = re.sub(r"(?<![\$\\])\$(?!\s)([^\$\n]+?)(?<!\s)(?<!\\)\$(?!\$)", keep_inline_math, raw)
+
+    value = html.escape(raw)
     value = re.sub(r"\[([^]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', value)
     value = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", value)
     value = re.sub(r"(?<!\*)\*([^*]+)\*(?!\*)", r"<em>\1</em>", value)
+
     for i, snippet in enumerate(code):
         value = value.replace(f"@@CODE{i}@@", snippet)
+    for i, snippet in enumerate(math_spans):
+        value = value.replace(f"@@MATH{i}@@", snippet)
+
     return value
 
 
@@ -95,6 +112,20 @@ def markdown_to_html(markdown: str) -> tuple[str, list[dict[str, str]]]:
             else:
                 output.append(f"<h{level}>{inline(title)}</h{level}>")
             i += 1; continue
+        if line.strip().startswith("$$"):
+            block = [line.strip()]
+            if line.strip() == "$$" or not (line.strip().endswith("$$") and len(line.strip()) > 2):
+                i += 1
+                while i < len(lines):
+                    block.append(lines[i].rstrip())
+                    if lines[i].strip().endswith("$$"):
+                        i += 1
+                        break
+                    i += 1
+            else:
+                i += 1
+            output.append(f'<div class="math-block">{html.escape(chr(10).join(block))}</div>')
+            continue
         if line.lstrip().startswith(">"):
             block: list[str] = []
             while i < len(lines) and lines[i].lstrip().startswith(">"):
@@ -122,7 +153,7 @@ def markdown_to_html(markdown: str) -> tuple[str, list[dict[str, str]]]:
                 i += 1
             output.append(render_list(block)); continue
         para = [line.strip()]; i += 1
-        while i < len(lines) and lines[i].strip() and not re.match(r"^(#{1,6})\s+|^\s*(?:[-+*]|\d+[.)])\s+|^\s*>", lines[i]):
+        while i < len(lines) and lines[i].strip() and not re.match(r"^(#{1,6})\s+|^\s*(?:[-+*]|\d+[.)])\s+|^\s*>|^\s*\$\$", lines[i]):
             if "|" in lines[i] and i + 1 < len(lines) and is_table_rule(lines[i + 1]): break
             para.append(lines[i].strip()); i += 1
         output.append(f"<p>{inline(' '.join(para))}</p>")
