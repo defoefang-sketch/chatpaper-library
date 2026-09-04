@@ -28,7 +28,7 @@ papers/<slug>/mindmap.md
 papers/<slug>/mindmap.svg
 ```
 
-The analysis Markdown is the source of truth for the HTML detail page. Keep headings, lists, block quotes, and comparison tables valid Markdown.
+The analysis Markdown is the source of truth for the HTML detail page. Keep headings, lists, block quotes, and comparison tables valid Markdown. Format mathematical equations using standard LaTeX delimiters (`$...$` for inline math, `$$...$$` on separate lines for display math, or backticks `` `...` `` for concise symbols).
 
 ## Generate the mind map locally
 
